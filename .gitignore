@@ -1,0 +1,101 @@
+# ============================================
+# ROOT .GITIGNORE - Fraud Guard Project
+# ============================================
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Environment Variables (CRITICAL - Contains Secrets)
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+*.env
+
+# Python Virtual Environments
+venv/
+env/
+ENV/
+.venv
+virtualenv/
+*.egg-info/
+
+# Node.js Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# Build Artifacts
+dist/
+build/
+*.pyc
+*.pyo
+__pycache__/
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+
+# Large Dataset Files (Exceeds GitHub 100MB Limit)
+# Use Git LFS if needed: git lfs track "*.csv"
+*.csv
+!sample_batch.csv
+!test_data/*.csv
+# Exclude the large creditcard dataset
+dataset/*.csv
+
+# Model Checkpoints (Use Git LFS for large files)
+# Current model files are small (<1MB) so we keep them
+# *.pth
+# *.pkl
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+*.ipynb
+
+# PyTorch Lightning & TensorBoard Logs
+lightning_logs/
+tensorboard_logs/
+tb_logs/
+runs/
+
+# Coverage Reports
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Package Lock Files (Optional - uncomment if needed)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
