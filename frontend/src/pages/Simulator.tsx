@@ -45,7 +45,7 @@ export default function Simulator() {
       
       toast({
         title: prediction.isFraud ? "THREAT DETECTED" : "TRANSACTION APPROVED",
-        description: `Reconstruction Error: ${prediction.anomalyScore.toFixed(6)} | Threshold: ${prediction.threshold.toFixed(6)}`,
+        description: `Anomaly Score: ${prediction.anomalyScore.toFixed(6)} | Threshold: ${prediction.threshold.toFixed(6)}`,
         variant: prediction.isFraud ? "destructive" : "default",
       });
     } catch (error) {
@@ -53,7 +53,7 @@ export default function Simulator() {
       setResult({ status: "idle", anomalyScore: 0, threshold: 0 });
       toast({
         title: "System Connection Lost",
-        description: "Flask backend offline - ensure server is running on port 5000",
+        description: "Backend is unreachable. Please verify API deployment and VITE_API_URL.",
         variant: "destructive",
       });
     }
@@ -252,11 +252,11 @@ export default function Simulator() {
                 className="rounded-2xl border border-border bg-card p-5 space-y-5"
               >
                 <ScoreBar 
-                  label="Reconstruction Error" 
+                  label="Anomaly Score" 
                   value={result.anomalyScore} 
                   threshold={result.threshold}
                   danger={result.anomalyScore > result.threshold}
-                  subtitle="Mean Squared Error (MSE)"
+                  subtitle="Lower than threshold = approved"
                 />
                 <ScoreBar 
                   label="Structural Confidence" 
