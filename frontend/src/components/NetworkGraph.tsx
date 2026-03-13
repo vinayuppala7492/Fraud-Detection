@@ -18,6 +18,20 @@ const CROSS_EDGES = [
   [3, 4],
 ];
 
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value));
+}
+
+// Deterministic pseudo-random generator so each analysis yields a reproducible graph.
+function seededRandom(seed: number) {
+  let t = seed + 0x6d2b79f5;
+  return () => {
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 function edgeColor(status: Status) {
   if (status === "approved") return "hsl(157,100%,50%)";
   if (status === "blocked") return "hsl(0,80%,60%)";
@@ -35,9 +49,39 @@ function glowFilter(status: Status) {
   return `drop-shadow(0 0 8px hsla(${color},0.6))`;
 }
 
-export default function NetworkGraph({ status }: { status: Status }) {
+type NetworkGraphProps = {
+  status: Status;
+  anomalyScore?: number;
+  threshold?: number;
+  signal?: number;
+};
+
+export default function NetworkGraph({ status, anomalyScore = 0, threshold = 1, signal = 0 }: NetworkGraphProps) {
   const isLoading = status === "loading";
   const resolved = status === "approved" || status === "blocked";
+  const ratio = threshold > 0 ? clamp(anomalyScore / threshold, 0, 2) : 0;
+
+  const baseSeed = Math.floor((anomalyScore + 1) * 10000) + Math.floor((threshold + 1) * 1000) + signal * 97;
+  const rand = seededRandom(baseSeed);
+
+  const nodes = OUTER_NODES.map((node) => {
+    const jitterX = (rand() - 0.5) * 28;
+    const jitterY = (rand() - 0.5) * 24;
+    return {
+      ...node,
+      x: clamp(node.x + jitterX, 30, 370),
+      y: clamp(node.y + jitterY, 25, 220),
+    };
+  });
+
+  const edgeWeights = nodes.map(() => clamp(0.45 + rand() * 0.35 + (resolved ? ratio * 0.2 : 0), 0.35, 1));
+
+  // Highlight strongest neighborhood edges when analysis is complete.
+  const highlighted = edgeWeights
+    .map((w, i) => ({ w, i }))
+    .sort((a, b) => b.w - a.w)
+    .slice(0, resolved ? (status === "blocked" ? 5 : 3) : 0)
+    .map((item) => item.i);
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5">
@@ -59,10 +103,10 @@ export default function NetworkGraph({ status }: { status: Status }) {
           {CROSS_EDGES.map(([a, b], i) => (
             <motion.line
               key={`cross-${i}`}
-              x1={OUTER_NODES[a].x}
-              y1={OUTER_NODES[a].y}
-              x2={OUTER_NODES[b].x}
-              y2={OUTER_NODES[b].y}
+              x1={nodes[a].x}
+              y1={nodes[a].y}
+              x2={nodes[b].x}
+              y2={nodes[b].y}
               stroke="hsl(232,12%,20%)"
               strokeWidth="0.5"
               initial={{ opacity: 0.3 }}
@@ -72,7 +116,7 @@ export default function NetworkGraph({ status }: { status: Status }) {
           ))}
 
           {/* Main edges from center to outer */}
-          {OUTER_NODES.map((node, i) => (
+          {nodes.map((node, i) => (
             <motion.line
               key={`edge-${i}`}
               x1={CENTER.x}
@@ -80,10 +124,10 @@ export default function NetworkGraph({ status }: { status: Status }) {
               x2={node.x}
               y2={node.y}
               stroke={edgeColor(status)}
-              strokeWidth={resolved ? 2 : 1}
+              strokeWidth={resolved ? 1 + edgeWeights[i] * 2 : 1}
               initial={{ opacity: 0.4, pathLength: 0 }}
               animate={{
-                opacity: isLoading ? [0.3, 1, 0.3] : resolved ? 0.7 : 0.4,
+                opacity: isLoading ? [0.3, 1, 0.3] : resolved ? (highlighted.includes(i) ? 0.9 : 0.45) : 0.4,
                 pathLength: 1,
               }}
               transition={
@@ -96,7 +140,7 @@ export default function NetworkGraph({ status }: { status: Status }) {
           ))}
 
           {/* Outer nodes */}
-          {OUTER_NODES.map((node, i) => (
+          {nodes.map((node, i) => (
             <g key={`node-${i}`}>
               <motion.circle
                 cx={node.x}

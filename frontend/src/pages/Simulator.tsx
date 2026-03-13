@@ -20,10 +20,12 @@ export default function Simulator() {
   const [time, setTime] = useState("14");
   const [profile, setProfile] = useState<"genuine" | "fraud">("genuine");
   const [result, setResult] = useState<SimResult>({ status: "idle", anomalyScore: 0, threshold: 0 });
+  const [analysisSignal, setAnalysisSignal] = useState(0);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const { toast } = useToast();
 
   const handleAnalyze = async () => {
+    setAnalysisSignal((prev) => prev + 1);
     setResult({ status: "loading", anomalyScore: 0, threshold: 0 });
     
     try {
@@ -279,7 +281,12 @@ export default function Simulator() {
             )}
 
             {/* Network Graph */}
-            <NetworkGraph status={result.status} />
+            <NetworkGraph
+              status={result.status}
+              anomalyScore={result.anomalyScore}
+              threshold={result.threshold}
+              signal={analysisSignal}
+            />
           </div>
         </div>
       </div>
