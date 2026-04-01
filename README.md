@@ -4,7 +4,7 @@
 
 ### Structure-First Credit Card Fraud Detection Platform
 
-*A production-grade SaaS system engineered to detect sophisticated, zero-day fraud rings through graph-based anomaly detection* .
+*A production-grade SaaS system engineered to detect sophisticated, zero-day fraud rings through graph-based anomaly detection*
 
 [![React](https://img.shields.io/badge/React-18.3-61dafb?style=for-the-badge&logo=react&logoColor=white)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178c6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
